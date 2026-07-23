@@ -1776,7 +1776,7 @@ TEST_P(MergeUpdateClauseInsertAndUpdate, InsertAfterLastRow) {
     MergeUpdateClause clause = create_clause(GetParam(), component_manager, std::move(input_frame));
 
     const std::vector<std::vector<size_t>> structure_indices = clause.structure_for_processing(ranges_and_keys);
-    // Inserting in the beginning of the DataFrame picks the first row slice
+    // Inserting in the end picks the last row slice
     ASSERT_EQ(structure_indices.size(), 1);
     ASSERT_EQ(structure_indices[0].size(), col_slice_count);
 
