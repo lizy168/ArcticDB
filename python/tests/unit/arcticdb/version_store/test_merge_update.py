@@ -335,6 +335,30 @@ class TestMergeTimeseriesUpdate:
         assert len(lt.find_keys_for_symbol(KeyType.TABLE_INDEX, "sym")) == 2
         assert len(lt.find_keys_for_symbol(KeyType.VERSION, "sym")) == 2
 
+    def test_dedup_map_deduplicates_unchanged_column_slice(self, lmdb_library_factory):
+        lib = lmdb_library_factory(arcticdb.LibraryOptions(columns_per_segment=2, dedup=True))
+        target = pd.DataFrame(
+            {"a": [1, 2, 3], "b": [1.0, 2.0, 3.0], "c": [10, 20, 30], "d": [100.0, 200.0, 300.0]},
+            index=pd.date_range("2024-01-01", periods=3),
+        )
+        lib.write("sym", target)
+        source = pd.DataFrame(
+            {"a": [20, 30], "b": [20.0, 30.0], "c": [20, 30], "d": [200.0, 300.0]},
+            index=pd.DatetimeIndex([pd.Timestamp("2024-01-02"), pd.Timestamp("2024-01-03")]),
+        )
+        lib.merge_experimental("sym", source, strategy=self.strategy)
+        expected = pd.DataFrame(
+            {"a": [1, 20, 30], "b": [1.0, 20.0, 30.0], "c": [10, 20, 30], "d": [100.0, 200.0, 300.0]},
+            index=pd.date_range("2024-01-01", periods=3),
+        )
+        assert_frame_equal(lib.read("sym").data, expected)
+
+        lt = lib._dev_tools.library_tool()
+        assert len(lt.find_keys_for_symbol(KeyType.TABLE_DATA, "sym")) == 3
+        keys_v0 = lt.dataframe_to_keys(lt.read_index("sym", as_of=0), "sym")
+        keys_v1 = lt.dataframe_to_keys(lt.read_index("sym", as_of=1), "sym")
+        assert keys_v0[-1] == keys_v1[-1]
+
     @pytest.mark.parametrize(
         "slicing_policy",
         [
