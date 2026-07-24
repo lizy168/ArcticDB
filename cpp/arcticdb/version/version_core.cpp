@@ -3167,7 +3167,7 @@ folly::Future<VersionedItem> merge_update_impl(
     user_input::check<ErrorCode::E_INVALID_USER_ARGUMENT>(
             !write_options.dynamic_schema, "Cannot merge update with dynamic schema"
     );
-    internal::check<ErrorCode::E_ASSERTION_FAILURE>(
+    internal::check<ErrorCode::E_NOT_IMPLEMENTED>(
             strategy.not_matched_by_target != MergeAction::INSERT ||
                     pipeline_context->descriptor().index().type() == IndexDescriptor::Type::TIMESTAMP,
             "Merge update with INSERT strategy is not implemented for ROWRANGE indexes yet."
