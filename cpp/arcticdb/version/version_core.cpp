@@ -3208,7 +3208,7 @@ folly::Future<VersionedItem> merge_update_impl(
                 ankerl::unordered_dense::map<RowRange, size_t> inserted_rows_per_row_range;
                 component_manager->process_entities([&](const MergeUpdateInsertedRowsEntity& inserted_rows,
                                                         const std::shared_ptr<RowRange>& row_range) {
-                    inserted_rows_per_row_range.emplace(*row_range, inserted_rows.inserted_rows);
+                    inserted_rows_per_row_range.emplace(*row_range, inserted_rows);
                 });
                 std::vector<SliceAndKey> merged_ranges_and_keys = merge_slices_and_keys(
                         std::move(pipeline_context->slice_and_keys_),

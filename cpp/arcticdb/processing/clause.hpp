@@ -31,10 +31,6 @@
 
 namespace arcticdb {
 
-struct MergeUpdateInsertedRowsEntity {
-    size_t inserted_rows;
-};
-
 using ResampleOrigin = std::variant<std::string, timestamp>;
 
 using RangesAndKey = pipelines::RangesAndKey;
