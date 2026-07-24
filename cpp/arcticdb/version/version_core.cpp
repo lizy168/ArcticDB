@@ -436,7 +436,7 @@ std::vector<SliceAndKey> merge_slices_and_keys(
                 ++old_slice_and_key_it;
             } else {
                 const RowRange new_row_range = new_slice_and_key_it->slice().row_range;
-                const size_t inserted_rows = inserted_rows_per_row_range[new_row_range];
+                const size_t inserted_rows = inserted_rows_per_row_range.at(new_row_range);
                 new_slice_and_key_it->slice().row_range.first += total_inserted_rows;
                 new_slice_and_key_it->slice().row_range.second += total_inserted_rows + inserted_rows;
                 total_inserted_rows += inserted_rows;
