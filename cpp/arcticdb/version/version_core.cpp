@@ -3043,7 +3043,8 @@ folly::Future<ReadVersionOutput> read_frame_for_version(
 folly::Future<std::vector<SliceAndKey>> read_modify_write_data_keys(
         const std::shared_ptr<Store>& store, std::shared_ptr<ReadQuery> read_query, const ReadOptions& read_options,
         const IndexPartialKey& target_partial_index_key, const std::shared_ptr<PipelineContext>& pipeline_context,
-        std::shared_ptr<ComponentManager> component_manager, std::shared_ptr<DeDupMap> de_dup_map
+        std::shared_ptr<ComponentManager> component_manager = std::make_shared<ComponentManager>(),
+        std::shared_ptr<DeDupMap> de_dup_map = std::make_shared<DeDupMap>()
 ) {
     auto write_clause_processing_structure = read_query->clauses_.empty()
                                                      ? ProcessingStructure::ROW_SLICE
@@ -3080,15 +3081,7 @@ folly::Future<VersionedItem> read_modify_write_impl(
         const IndexPartialKey& target_partial_index_key, const std::shared_ptr<PipelineContext>& pipeline_context,
         std::optional<proto::descriptors::UserDefinedMetadata>&& user_meta_proto
 ) {
-    return read_modify_write_data_keys(
-                   store,
-                   read_query,
-                   read_options,
-                   target_partial_index_key,
-                   pipeline_context,
-                   std::make_shared<ComponentManager>(),
-                   std::make_shared<DeDupMap>()
-    )
+    return read_modify_write_data_keys(store, read_query, read_options, target_partial_index_key, pipeline_context)
             .thenValue([&](std::vector<SliceAndKey>&& data_keys_and_slices) {
                 ARCTICDB_DEBUG_CHECK(
                         ErrorCode::E_ASSERTION_FAILURE,
@@ -3475,13 +3468,7 @@ folly::Future<std::optional<VersionedItem>> compact_data_impl(
                 ReadOptions read_options;
                 read_options.set_dynamic_schema(dynamic_schema);
                 return read_modify_write_data_keys(
-                               store,
-                               read_query,
-                               read_options,
-                               target_partial_index_key,
-                               pipeline_context,
-                               std::make_shared<ComponentManager>(),
-                               std::make_shared<DeDupMap>()
+                               store, read_query, read_options, target_partial_index_key, pipeline_context
                 )
                         .thenValue(
                                 [pipeline_context = std::move(pipeline_context),
